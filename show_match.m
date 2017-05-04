@@ -8,11 +8,12 @@
 %
 % Example: match('scene.pgm','book.pgm');
 
-function num = match(image1, image2)
+function num = show_match(image1, image2)
 
+addpath('C:\Users\yoshi\Documents\MATLAB\SIFT\OriginalCode');
 % Find SIFT keypoints for each image
-[im1, des1, loc1] = sift(image1);
-[im2, des2, loc2] = sift(image2);
+[im1, des1, loc1] = sift_ri(image1);
+[im2, des2, loc2] = sift_ri(image2);
 
 % For efficiency in Matlab, it is cheaper to compute dot products between
 %  unit vectors rather than Euclidean distances.  Note that the ratio of 

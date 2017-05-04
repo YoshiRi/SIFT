@@ -1,8 +1,8 @@
-% ri_changed in May 4
+% ri@HFLAB changed in May 4
 % 1. change sift to sift_ri
 % 2. omit showing figure
 % 3. output matched points cloud
-%
+
 % [points1 points2] = match_ri(image1, image2)
 %
 % This function reads two images, finds their SIFT features, and
