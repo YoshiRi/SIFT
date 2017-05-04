@@ -6,41 +6,62 @@
 % 
 % 
 % Extract using equation
-% [ x y ]^T = [ a b c; d e f ] [x_t y_t 1]^T 
+% [ x y ]^T = [ a b c; -b a d ] [x_t y_t 1]^T 
 
-function [Pp  Para]= Helmert2D(Xref,X)
+function [Pp  Para Xref X]= Helmert2D(Xref,X)
 
-Sz = size(Xref);
-if Sz ~= size(X)
+if size(Xref) ~= size(X)
     error('Different Size!\n');
+elseif   size(Xref,1) < 2
+    error('Feature points must be more than 2');
 end
 
 %% get affineParam [abcdef]'
-NP = Sz(2); % number of points
+NP = size(Xref,1); % number of points
 
-zeromat = zeros(NP,3);
+zeromat = zeros(NP,1);
 onemat = ones(NP,1);
 
-Aup = horzcat(Xref,onemat,zeromat);
-Adown = horzcat(zeromat,Xref,onemat);
-A = vertcat(Aup,Adown);
+% begin ransac
+flag =1;
+while flag
+    if size(Xref,1) < 2
+        error('Match error');
+    end
 
-b = vertcat(X(1,:)',X(2,:)');
+    Aup = horzcat(Xref,onemat,zeromat);
+    Adown = horzcat(Xref(:,2),-Xref(:,1),zeromat,onemat);
+    A = vertcat(Aup,Adown);
 
-% parameter [ a b c d e f ]'
-Para = pinv(A)*b; 
+    b = vertcat(X(:,1),X(:,2));
 
+% parameter [ a b c d ]'
+    Para = pinv(A)*b; 
+
+%% exclude  mismatch
+    Err =A*Para -b;
+    er = Err(1:size(Err,1)/2).^2 +Err(size(Err,1)/2+1:size(Err,1)).^2;
+    EX = find(er>median(er)*2);
+    sz = size(EX,1);
+    if sz < 1
+        break;
+    end
+    % exclude data
+    Xref(EX,:)=[];
+    X(EX,:)=[];
+    onemat(EX)=[];zeromat(EX)=[];
+end
 %% output Estimated parameter
-scale = sqrt((Para(1)^2+Para(2)^2+Para(4)^2+Para(5)^2)/2);
+scale = sqrt(Para(1)^2+Para(2)^2);
 theta = atan2(Para(2),Para(1));
 
 Ar = zeros(2);
 Ar(1,1) = Para(1);
 Ar(1,2) = Para(2);
-Ar(2,1) = Para(4);
-Ar(2,2) = Para(5);
+Ar(2,1) = -Para(2);
+Ar(2,2) = Para(1);
 
-At = inv(Ar) * [Para(3);Para(6)];
+At = Ar\ [Para(3);Para(4)];
 
 Pp = zeros(4,1);
 % Pp(1) = Para(3);

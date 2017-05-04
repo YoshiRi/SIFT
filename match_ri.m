@@ -11,9 +11,9 @@
 %   second closest match.
 % It returns the number of matched coordinate.
 % Example of Out put >> 
-% [ [p1_y1 p1_x1],[p1_y2 p1_x2] ]
+% [ [ p1_x1 p1_y1 ],[ p1_x2 p1_y2 ] ]
 %              ...
-% [ [pn_y1 pn_x1],[pn_y2 pn_x2] ]
+% [ [ pn_x1 pn_y1],[ pn_x2 pn_y2 ] ]
 
 function [p1 p2] = match(image1, image2)
 
@@ -52,8 +52,8 @@ cnt = 1;
 
 for i = 1: size(des1,1)
   if (match(i) > 0)
-    p1(cnt,:)=loc1(i,1:2);
-    p2(cnt,:)=loc2(match(i),1:2);
+    p1(cnt,:)=[loc1(i,2),loc1(i,1)];
+    p2(cnt,:)=[loc2(match(i),2),loc2(match(i),1)];
     cnt = cnt + 1;
   end
 end
