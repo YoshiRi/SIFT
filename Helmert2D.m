@@ -1,19 +1,22 @@
 % 2017/5/4 Yoshi Ri @ UT
 % Extract 2D Helmert parameter, translation rotation scaling
 % 
-% Input 
-% 
-% 
+% Input :(x*,y*) (x,y)
+% Output: [translation 1/scaling rotation], [a b c d], matched Xref,
+% matched X, FinalErr or Success
+%  If there is no matching or miss, return -1
 % 
 % Extract using equation
 % [ x y ]^T = [ a b c; -b a d ] [x_t y_t 1]^T 
 
-function [Pp  Para Xref X]= Helmert2D(Xref,X)
+function [Pp , Para, Xref ,X, FinalErr]= Helmert2D(Xref,X)
 
 if size(Xref) ~= size(X)
     error('Different Size!\n');
 elseif   size(Xref,1) < 2
-    error('Feature points must be more than 2');
+%     error('Feature points must be more than 2');
+    Pp = 0;Para = 0;FinalErr = -1;
+    return;
 end
 
 %% get affineParam [abcdef]'
@@ -26,7 +29,8 @@ onemat = ones(NP,1);
 flag =1;
 while flag
     if size(Xref,1) < 2
-        error('Match error');
+        Pp = 0;Para = 0;FinalErr = -1;
+        return;
     end
 
     Aup = horzcat(Xref,onemat,zeromat);
@@ -51,6 +55,9 @@ while flag
     X(EX,:)=[];
     onemat(EX)=[];zeromat(EX)=[];
 end
+
+FinalErr = sum(er)/size(er,1);
+
 %% output Estimated parameter
 scale = sqrt(Para(1)^2+Para(2)^2);
 theta = atan2(Para(2),Para(1));
